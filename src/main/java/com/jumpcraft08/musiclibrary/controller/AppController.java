@@ -1,15 +1,21 @@
 package com.jumpcraft08.musiclibrary.controller;
 
+import com.jumpcraft08.musiclibrary.SongFile;
 import javafx.fxml.FXML;
+import javafx.scene.control.TableView;
 
 
 public class AppController {
 
     @FXML
-    private TableController tableSection;
+    private TableView<SongFile> TableSong;
+
+    protected TableView<SongFile> getTableSong() {
+        return TableSong;
+    }
 
     @FXML
     public void SelectFolderController() {
-        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, tableSection);
+        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, TableSong);
     }
 }
