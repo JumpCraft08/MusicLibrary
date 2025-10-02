@@ -1,4 +1,4 @@
-module com.jumpcraft08.musiclibrary {
+module com.jumpcraft.musiclibrary {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
