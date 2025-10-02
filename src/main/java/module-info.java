@@ -10,4 +10,5 @@ module com.jumpcraft08.musiclibrary {
     opens com.jumpcraft08.musiclibrary.controller to javafx.fxml;
     exports com.jumpcraft08.musiclibrary.view;
     opens com.jumpcraft08.musiclibrary.view to javafx.fxml;
+    exports com.jumpcraft08.musiclibrary.util;
 }

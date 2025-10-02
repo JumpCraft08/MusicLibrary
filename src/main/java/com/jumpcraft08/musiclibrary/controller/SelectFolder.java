@@ -1,11 +1,11 @@
 package com.jumpcraft08.musiclibrary.controller;
 
 import com.jumpcraft08.musiclibrary.view.TablePopulator;
-import com.jumpcraft08.musiclibrary.SongFile;
 
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import javafx.scene.control.TableView;
+
+import com.jumpcraft08.musiclibrary.util.TableBundle;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ public class SelectFolder {
         POPULATE_TABLE
     }
 
-    public static void Select(SelectReason reason, TableView<SongFile> table) {
+    public static void Select(SelectReason reason, TableBundle bundle) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Seleccionar carpeta");
 
@@ -28,7 +28,7 @@ public class SelectFolder {
         }
 
         if (reason == SelectReason.POPULATE_TABLE) {
-            TablePopulator.populateTable(table, folder);
+            TablePopulator.populateTable(bundle, folder);
         } else {
             System.out.println("Nada que mostrar aqui");
         }
