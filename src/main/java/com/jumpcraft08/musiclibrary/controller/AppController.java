@@ -10,10 +10,6 @@ public class AppController {
     @FXML
     private TableView<SongFile> TableSong;
 
-    protected TableView<SongFile> getTableSong() {
-        return TableSong;
-    }
-
     @FXML
     public void SelectFolderController() {
         SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, TableSong);
