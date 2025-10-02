@@ -30,7 +30,7 @@ public class SelectFolder {
         if (reason == SelectReason.POPULATE_TABLE) {
             TablePopulator.populateTable(table, folder);
         } else {
-            System.out.println("Nada que mostrar");
+            System.out.println("Nada que mostrar aqui");
         }
 
     }
