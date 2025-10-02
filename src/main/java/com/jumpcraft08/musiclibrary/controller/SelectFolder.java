@@ -5,7 +5,7 @@ import com.jumpcraft08.musiclibrary.view.TablePopulator;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
-import com.jumpcraft08.musiclibrary.util.TableBundle;
+import com.jumpcraft08.musiclibrary.model.TableBundle;
 
 import java.io.File;
 

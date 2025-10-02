@@ -14,23 +14,15 @@
 
     <top>
         <MenuBar BorderPane.alignment="CENTER">
-            <menus>
-                <Menu mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Seleccionar Carpeta" onAction="#SelectFolderController"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
-                    </items>
-                </Menu>
-            </menus>
+            <Menu mnemonicParsing="false" text="File">
+                <MenuItem mnemonicParsing="false" text="Seleccionar Carpeta" onAction="#SelectFolderController"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Ver">
+                <MenuItem fx:id="ArtistColumnMenuItem" mnemonicParsing="false" text="Ver Columna Artistas" onAction="#HideArtistColumn" />
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+                <MenuItem mnemonicParsing="false" text="About" />
+            </Menu>
         </MenuBar>
     </top>
 

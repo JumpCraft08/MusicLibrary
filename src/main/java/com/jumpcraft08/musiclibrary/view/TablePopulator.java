@@ -1,7 +1,7 @@
 package com.jumpcraft08.musiclibrary.view;
 
-import com.jumpcraft08.musiclibrary.SongFile;
-import com.jumpcraft08.musiclibrary.util.TableBundle;
+import com.jumpcraft08.musiclibrary.model.SongFile;
+import com.jumpcraft08.musiclibrary.model.TableBundle;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -25,14 +25,14 @@ public class TablePopulator {
             }
         }
 
-        bundle.getFileNameColumn().setCellValueFactory(cell ->
+        bundle.fileNameColumn().setCellValueFactory(cell ->
                 new SimpleStringProperty(cell.getValue().getFileName())
         );
 
-        bundle.getArtistColumn().setCellValueFactory(cell ->
+        bundle.artistColumn().setCellValueFactory(cell ->
                 new SimpleStringProperty(cell.getValue().getArtist())
         );
 
-        bundle.getTable().setItems(songList);
+        bundle.table().setItems(songList);
     }
 }

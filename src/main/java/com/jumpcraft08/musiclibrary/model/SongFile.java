@@ -1,4 +1,4 @@
-package com.jumpcraft08.musiclibrary;
+package com.jumpcraft08.musiclibrary.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
