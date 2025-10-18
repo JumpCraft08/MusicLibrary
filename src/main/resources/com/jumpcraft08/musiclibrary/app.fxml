@@ -31,6 +31,7 @@
             <columns>
                 <TableColumn fx:id="FileNameColumn" prefWidth="132.0" text="Nombre de Archivo" />
                 <TableColumn fx:id="ArtistColumn" prefWidth="147.0" text="Artista" />
+                <TableColumn fx:id="VersionsColumn" prefWidth="122.0" text="Versiones" />
             </columns>
         </TableView>
     </center>

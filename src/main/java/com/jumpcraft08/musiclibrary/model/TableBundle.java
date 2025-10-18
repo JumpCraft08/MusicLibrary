@@ -6,5 +6,6 @@ import javafx.scene.control.TableView;
 public record TableBundle(
         TableView<SongFile> table,
         TableColumn<SongFile, String> fileNameColumn,
-        TableColumn<SongFile, String> artistColumn
+        TableColumn<SongFile, String> artistColumn,
+        TableColumn<SongFile, String> versionsColumn
 ) {}

@@ -3,6 +3,7 @@ package com.jumpcraft08.musiclibrary.controller;
 import com.jumpcraft08.musiclibrary.model.SongFile;
 import com.jumpcraft08.musiclibrary.model.TableBundle;
 import com.jumpcraft08.musiclibrary.util.ConfigManager;
+import com.jumpcraft08.musiclibrary.model.TypeFile;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -14,6 +15,7 @@ public class AppController {
     @FXML private TableView<SongFile> TableSong;
     @FXML private TableColumn<SongFile, String> FileNameColumn;
     @FXML private TableColumn<SongFile, String> ArtistColumn;
+    @FXML private TableColumn<SongFile, String> VersionsColumn;
 
     @FXML private MenuItem ArtistColumnMenuItem;
 
@@ -28,7 +30,7 @@ public class AppController {
 
     @FXML
     public void SelectFolderController() {
-        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, new TableBundle(TableSong, FileNameColumn, ArtistColumn));
+        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, new TableBundle(TableSong, FileNameColumn, ArtistColumn, VersionsColumn), TypeFile.FLAC_HI_RES, TypeFile.FLAC_CD, TypeFile.M4A);
     }
 
     @FXML
