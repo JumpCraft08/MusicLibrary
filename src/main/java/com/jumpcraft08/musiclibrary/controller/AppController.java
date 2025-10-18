@@ -6,6 +6,7 @@ import com.jumpcraft08.musiclibrary.util.ConfigManager;
 import com.jumpcraft08.musiclibrary.model.TypeFile;
 import com.jumpcraft08.musiclibrary.view.SongContextMenu;
 import com.jumpcraft08.musiclibrary.util.OpenSongFile;
+import com.jumpcraft08.musiclibrary.util.RatingManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -19,14 +20,19 @@ import java.io.File;
 public class AppController {
 
     @FXML private TableView<SongFile> TableSong;
+    @FXML private TableColumn<SongFile, File> CoverColumn;
     @FXML private TableColumn<SongFile, String> FileNameColumn;
     @FXML private TableColumn<SongFile, String> ArtistColumn;
     @FXML private TableColumn<SongFile, String> VersionsColumn;
+    @FXML private TableColumn<SongFile, Number> RatingColumn;
 
     @FXML private MenuItem ArtistColumnMenuItem;
     @FXML private MenuItem VersionsColumnMenuItem;
+    @FXML private MenuItem CoverColumnMenuItem;
+    @FXML private MenuItem RatingColumnMenuItem;
 
     private final ConfigManager config = new ConfigManager();
+    private final RatingManager ratingManager = new RatingManager();
 
     @FXML
     public void initialize() {
@@ -37,6 +43,24 @@ public class AppController {
         boolean showVersionsColumn = config.getBoolean("showVersionsColumn", true);
         VersionsColumn.setVisible(showVersionsColumn);
         VersionsColumnMenuItem.setText(showVersionsColumn ? "Ocultar Columna Versiones" : "Ver Columna Versiones");
+
+        boolean showRatingColumn = config.getBoolean("showRatingColumn", true);
+        RatingColumn.setVisible(showRatingColumn);
+        RatingColumnMenuItem.setText(showRatingColumn ? "Ocultar Columna Rating" : "Ver Columna Rating");
+
+        ratingManager.configureRatingColumn(RatingColumn);
+
+        // Columna cover
+        boolean showCoverColumn = config.getBoolean("showCoverColumn", false);
+        CoverColumn.setVisible(showCoverColumn);
+        CoverColumnMenuItem.setText(showCoverColumn ? "Ocultar Covers" : "Ver Covers");
+
+        // Asignar la columna Cover
+        CoverColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getCoverFile())
+        );
+        CoverColumn.setCellFactory(com.jumpcraft08.musiclibrary.view.RenderCover.create());
+
 
         TableSong.setRowFactory(tv -> {
             TableRow<SongFile> row = new TableRow<>();
@@ -55,13 +79,19 @@ public class AppController {
                             .otherwise(SongContextMenu.createContextMenu(row))
             );
 
+            row.prefHeightProperty().bind(
+                    javafx.beans.binding.Bindings.when(CoverColumn.visibleProperty())
+                            .then(64.0)
+                            .otherwise(24.0)
+            );
+
             return row;
         });
     }
 
     @FXML
     public void SelectFolderController() {
-        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, new TableBundle(TableSong, FileNameColumn, ArtistColumn, VersionsColumn), TypeFile.FLAC_HI_RES, TypeFile.FLAC_CD, TypeFile.M4A);
+        SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, new TableBundle(TableSong, FileNameColumn, ArtistColumn, VersionsColumn, RatingColumn), TypeFile.FLAC_HI_RES, TypeFile.FLAC_CD, TypeFile.M4A);
     }
 
     @FXML
@@ -74,6 +104,18 @@ public class AppController {
     public void HideVersionsColumn() {
         toggleColumnVisibility(VersionsColumn, VersionsColumnMenuItem, "showVersionsColumn",
                 "Ver Columna Versiones", "Ocultar Columna Versiones");
+    }
+
+    @FXML
+    public void HideCoverColumn() {
+        toggleColumnVisibility(CoverColumn, CoverColumnMenuItem, "showCoverColumn",
+                "Ver Columna Cover", "Ocultar Columna Cover");
+    }
+
+    @FXML
+    public void HideRatingColumn() {
+        toggleColumnVisibility(RatingColumn, RatingColumnMenuItem, "showRatingColumn",
+                "Ver Columna Rating", "Ocultar Columna Rating");
     }
 
     private void toggleColumnVisibility(TableColumn<?, ?> column, MenuItem menuItem, String configKey, String showText, String hideText) {

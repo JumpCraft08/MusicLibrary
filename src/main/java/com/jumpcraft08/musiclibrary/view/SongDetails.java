@@ -11,7 +11,10 @@ public class SongDetails {
         info.append("Artista: ").append(song.getArtist()).append("\n");
         info.append("Versiones: ").append(song.getVersionsAsString()).append("\n");
         File preferred = song.getPreferredFile();
-        info.append("Archivo preferido: ").append(preferred != null ? preferred.getAbsolutePath() : "Ninguno");
+        info.append("Archivo preferido: ").append(preferred != null ? preferred.getAbsolutePath() : "Ninguno").append("\n");
+        File cover = song.getCoverFile();
+        info.append("Cover: ").append(cover != null ? cover.getAbsolutePath() : "Ninguno");
+
 
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
         alert.setTitle("Detalles de la canción");

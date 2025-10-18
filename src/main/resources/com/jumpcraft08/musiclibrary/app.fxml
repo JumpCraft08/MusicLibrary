@@ -20,6 +20,8 @@
             <Menu mnemonicParsing="false" text="Ver">
                 <MenuItem fx:id="ArtistColumnMenuItem" mnemonicParsing="false" text="Ver Columna Artistas" onAction="#HideArtistColumn" />
                 <MenuItem fx:id="VersionsColumnMenuItem" mnemonicParsing="false" text="Ver Columna Versiones" onAction="#HideVersionsColumn" />
+                <MenuItem fx:id="CoverColumnMenuItem" mnemonicParsing="false" text="Ver Columna Cover" onAction="#HideCoverColumn" />
+                <MenuItem fx:id="RatingColumnMenuItem" mnemonicParsing="false" text="Ver Columna Rating" onAction="#HideRatingColumn" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
                 <MenuItem mnemonicParsing="false" text="About" />
@@ -30,9 +32,11 @@
     <center>
         <TableView fx:id="TableSong" prefHeight="400.0" prefWidth="600.0">
             <columns>
+                <TableColumn fx:id="CoverColumn" prefWidth="64.0" text="Cover" />
                 <TableColumn fx:id="FileNameColumn" prefWidth="132.0" text="Nombre de Archivo" />
                 <TableColumn fx:id="ArtistColumn" prefWidth="147.0" text="Artista" />
                 <TableColumn fx:id="VersionsColumn" prefWidth="122.0" text="Versiones" />
+                <TableColumn fx:id="RatingColumn" prefWidth="122.0" text="Rating" />
             </columns>
         </TableView>
     </center>

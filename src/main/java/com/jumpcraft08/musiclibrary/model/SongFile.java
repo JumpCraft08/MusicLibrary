@@ -1,8 +1,7 @@
 package com.jumpcraft08.musiclibrary.model;
 
-import com.jumpcraft08.musiclibrary.model.TypeFile;
-
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import java.io.File;
 import java.util.Set;
@@ -14,6 +13,7 @@ private final SimpleStringProperty Artist;
 private final Set<TypeFile> Versions = EnumSet.noneOf(TypeFile.class);
 private File preferredFile;
 private File coverFile;
+private final SimpleIntegerProperty rating = new SimpleIntegerProperty(-1);
 
     public SongFile(String FileName, String Artist) {
         this.FileName = new SimpleStringProperty(FileName);
@@ -28,16 +28,24 @@ private File coverFile;
         return Artist.get();
     }
 
-    public Set<TypeFile> getVersions() {
-        return Versions;
+    public int getRating() {
+        return rating.get();
     }
 
     public File getPreferredFile() {
         return preferredFile;
     }
 
+    public File getCoverFile() {
+        return coverFile;
+    }
+
     public void setCoverFile(File coverFile) {
         this.coverFile = coverFile;
+    }
+
+    public void setRating(int rating) {
+        this.rating.set(rating);
     }
 
     public void setPreferredFile(File preferredFile) {
@@ -51,5 +59,9 @@ private File coverFile;
     public String getVersionsAsString() {
         if (Versions.isEmpty()) return "";
         return String.join(", ", Versions.stream().map(Enum::name).toList());
+    }
+
+    public SimpleIntegerProperty ratingProperty() {
+        return rating;
     }
 }
