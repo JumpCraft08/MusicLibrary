@@ -1,11 +1,12 @@
 package com.jumpcraft08.musiclibrary.util;
 
+import com.jumpcraft08.musiclibrary.util.LogManager;
+
 import java.io.*;
 import java.util.Properties;
 
 public class ConfigManager {
     private static final String CONFIG_FILE = "musiclibrary.properties";
-
     private final Properties props = new Properties();
 
     public ConfigManager() {
@@ -14,7 +15,7 @@ public class ConfigManager {
             try (FileInputStream fis = new FileInputStream(file)) {
                 props.load(fis);
             } catch (IOException e) {
-                System.err.println("No se pudo cargar config: " + e.getMessage());
+                LogManager.logError(ConfigManager.class, "No se pudo cargar la configuración", e);
             }
         } else {
             System.out.println("No se encontró config.properties, se usará la configuración por defecto.");
@@ -31,11 +32,20 @@ public class ConfigManager {
         save();
     }
 
+    public String getString(String key, String defaultValue) {
+        return props.getProperty(key, defaultValue);
+    }
+
+    public void setString(String key, String value) {
+        props.setProperty(key, value);
+        save();
+    }
+
     private void save() {
         try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE)) {
             props.store(fos, "Configuración de MusicLibrary");
         } catch (IOException e) {
-            e.printStackTrace();
+            LogManager.logError(ConfigManager.class, "No se pudo guardar el archivo de configuración", e);
         }
     }
 }

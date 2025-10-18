@@ -3,6 +3,7 @@ package com.jumpcraft08.musiclibrary.view;
 import com.jumpcraft08.musiclibrary.model.SongFile;
 import com.jumpcraft08.musiclibrary.model.TableBundle;
 import com.jumpcraft08.musiclibrary.model.TypeFile;
+import com.jumpcraft08.musiclibrary.controller.ListFiles;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -19,44 +20,43 @@ public class TablePopulator {
 
     private static final int SEARCH_DEPTH = 3;
 
-    public static void populateTable(TableBundle bundle, List<File> versionFolders) {
+    public static void populateTable(TableBundle bundle, Map<TypeFile, File> versionFolders) {
         if (bundle == null || versionFolders == null) return;
 
         Map<String, SongFile> songMap = new HashMap<>();
 
-        for (File folder : versionFolders) {
+        for (Map.Entry<TypeFile, File> entry : versionFolders.entrySet()) {
+            TypeFile typeFile = entry.getKey();
+            File folder = entry.getValue();
+
             if (!folder.exists() || !folder.isDirectory()) continue;
 
-            // Determinar TypeFile según la carpeta de versión
-            TypeFile typeFile;
-            try {
-                typeFile = TypeFile.valueOf(folder.getName());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Carpeta desconocida: " + folder.getName());
-                continue;
-            }
-
-            // Buscar archivos dentro de la carpeta hasta SEARCH_DEPTH niveles
-            List<File> musicFiles = listMusicFiles(folder, SEARCH_DEPTH);
+            List<File> musicFiles = ListFiles.listFiles(folder, SEARCH_DEPTH, typeFile.getExtension());
 
             for (File file : musicFiles) {
                 String fileName = file.getName();
 
-                // Filtrar por extensiones válidas
-                if (!(fileName.endsWith(".m4a") || fileName.endsWith(".flac"))) continue;
-
-                // Extraer el nombre sin extensión
                 String nameWithoutExtension = fileName.contains(".")
                         ? fileName.substring(0, fileName.lastIndexOf('.'))
                         : fileName;
 
-                // Si ya existe la canción, añadir la versión; si no, crear nueva instancia
                 SongFile song = songMap.get(nameWithoutExtension);
                 if (song == null) {
                     song = new SongFile(nameWithoutExtension, "Desconocido");
                     songMap.put(nameWithoutExtension, song);
                 }
                 song.addVersion(typeFile);
+
+                File currentPreferred = song.getPreferredFile();
+                if (currentPreferred == null) {
+                    song.setPreferredFile(file);
+                } else {
+                    TypeFile currentPreferredType = TypeFile.fromFile(currentPreferred);
+                    if (currentPreferredType != null && typeFile.getPriority() < currentPreferredType.getPriority()) {
+                        song.setPreferredFile(file);
+                    }
+                }
+
             }
         }
 
@@ -78,23 +78,5 @@ public class TablePopulator {
         );
 
         bundle.table().setItems(songList);
-    }
-
-    private static List<File> listMusicFiles(File folder, int maxDepth) {
-        List<File> result = new ArrayList<>();
-        if (maxDepth < 0) return result;
-
-        File[] files = folder.listFiles();
-        if (files == null) return result;
-
-        for (File file : files) {
-            if (file.isFile()) {
-                result.add(file);
-            } else if (file.isDirectory()) {
-                result.addAll(listMusicFiles(file, maxDepth - 1));
-            }
-        }
-
-        return result;
     }
 }

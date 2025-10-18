@@ -19,6 +19,7 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Ver">
                 <MenuItem fx:id="ArtistColumnMenuItem" mnemonicParsing="false" text="Ver Columna Artistas" onAction="#HideArtistColumn" />
+                <MenuItem fx:id="VersionsColumnMenuItem" mnemonicParsing="false" text="Ver Columna Versiones" onAction="#HideVersionsColumn" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
                 <MenuItem mnemonicParsing="false" text="About" />

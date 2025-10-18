@@ -3,6 +3,7 @@ module com.jumpcraft08.musiclibrary {
     requires javafx.fxml;
     requires javafx.graphics;
     requires java.logging;
+    requires java.desktop;
 
 
     opens com.jumpcraft08.musiclibrary to javafx.fxml;

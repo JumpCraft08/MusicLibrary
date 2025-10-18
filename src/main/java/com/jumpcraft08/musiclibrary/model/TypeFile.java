@@ -1,5 +1,7 @@
 package com.jumpcraft08.musiclibrary.model;
 
+import java.io.File;
+
 public enum TypeFile {
     M4A(3, ".m4a"),
     FLAC_CD(1, ".flac"),
@@ -19,5 +21,15 @@ public enum TypeFile {
 
     public String getExtension() {
         return extension;
+    }
+
+    public static TypeFile fromFile(File file) {
+        String name = file.getName().toLowerCase();
+        for (TypeFile type : values()) {
+            if (name.endsWith(type.getExtension().toLowerCase())) {
+                return type;
+            }
+        }
+        return null; // Ningún tipo coincide
     }
 }
