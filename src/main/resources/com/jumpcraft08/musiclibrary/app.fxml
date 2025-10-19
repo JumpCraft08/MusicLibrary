@@ -6,6 +6,9 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Slider?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0"
@@ -40,5 +43,12 @@
             </columns>
         </TableView>
     </center>
+
+    <bottom>
+        <HBox fx:id="PlaybackControls" spacing="10" visible="true" alignment="CENTER">
+            <Button fx:id="PlayPauseButton" text="Play"/>
+            <Slider fx:id="PlaybackSlider" min="0" max="1000" value="0" prefWidth="400"/>
+        </HBox>
+    </bottom>
 
 </BorderPane>

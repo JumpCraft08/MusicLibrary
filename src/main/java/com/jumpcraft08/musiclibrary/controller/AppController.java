@@ -7,6 +7,8 @@ import com.jumpcraft08.musiclibrary.model.TypeFile;
 import com.jumpcraft08.musiclibrary.view.SongContextMenu;
 import com.jumpcraft08.musiclibrary.util.OpenSongFile;
 import com.jumpcraft08.musiclibrary.util.RatingManager;
+import com.jumpcraft08.musiclibrary.view.FlacPlayer;
+
 
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -14,6 +16,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 
 import java.io.File;
 
@@ -31,6 +36,22 @@ public class AppController {
     @FXML private MenuItem CoverColumnMenuItem;
     @FXML private MenuItem RatingColumnMenuItem;
 
+    @FXML private HBox PlaybackControls;
+    @FXML private Button PlayPauseButton;
+    @FXML private Slider PlaybackSlider;
+
+    private FlacPlayer flacPlayer = new FlacPlayer();
+    private SongFile currentSong;
+
+    private Thread sliderUpdaterThread; // hilo único para actualizar slider
+    private volatile boolean stopSliderUpdater = false;
+
+    private volatile boolean userDraggingSlider = false;
+
+    private Thread[] sliderThreadHolder = new Thread[1];
+    private boolean[] stopSliderUpdaterWrapper = new boolean[1]; // wrapper para detener slider
+    private boolean[] userDraggingSliderWrapper = new boolean[1];
+
     private final ConfigManager config = new ConfigManager();
     private final RatingManager ratingManager = new RatingManager();
 
@@ -47,15 +68,11 @@ public class AppController {
         boolean showRatingColumn = config.getBoolean("showRatingColumn", true);
         RatingColumn.setVisible(showRatingColumn);
         RatingColumnMenuItem.setText(showRatingColumn ? "Ocultar Columna Rating" : "Ver Columna Rating");
-
         ratingManager.configureRatingColumn(RatingColumn);
 
-        // Columna cover
         boolean showCoverColumn = config.getBoolean("showCoverColumn", false);
         CoverColumn.setVisible(showCoverColumn);
         CoverColumnMenuItem.setText(showCoverColumn ? "Ocultar Covers" : "Ver Covers");
-
-        // Asignar la columna Cover
         CoverColumn.setCellValueFactory(cell ->
                 new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getCoverFile())
         );
@@ -68,7 +85,15 @@ public class AppController {
             // Doble clic
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    OpenSongFile.openSong(row.getItem());
+                    OpenSongFile.openSong(
+                            row.getItem(),               // canción
+                            flacPlayer,                  // reproductor
+                            PlaybackSlider,              // slider
+                            PlayPauseButton,             // botón
+                            sliderThreadHolder,          // hilo del slider
+                            stopSliderUpdaterWrapper,    // wrapper para detener slider
+                            userDraggingSliderWrapper    // wrapper para arrastre
+                    );
                 }
             });
 
@@ -87,6 +112,75 @@ public class AppController {
 
             return row;
         });
+
+        PlayPauseButton.setOnAction(e -> {
+            if (flacPlayer.isPlaying()) {
+                flacPlayer.pause();
+                PlayPauseButton.setText("Play");
+            } else {
+                flacPlayer.play();
+                PlayPauseButton.setText("Pause");
+            }
+        });
+
+        // NUEVO: Slider para hacer seek
+        PlaybackSlider.setOnMouseReleased(e -> {
+            if (flacPlayer.getTotalSamples() > 0) {
+                flacPlayer.seek((long) PlaybackSlider.getValue());
+            }
+        });
+
+        PlaybackSlider.setOnMousePressed(e -> userDraggingSliderWrapper[0] = true);
+        PlaybackSlider.setOnMouseReleased(e -> {
+            userDraggingSliderWrapper[0] = false;
+            if (flacPlayer.getTotalSamples() > 0) {
+                flacPlayer.seek((long) PlaybackSlider.getValue());
+            }
+        });
+    }
+
+    private void playSong(SongFile song) {
+        try {
+            File file = song.getPreferredFile();
+            if (file != null && file.exists()) {
+                // Detener reproducción anterior y slider
+                flacPlayer.stop();
+                stopSliderUpdater = true;
+                if (sliderUpdaterThread != null && sliderUpdaterThread.isAlive()) {
+                    sliderUpdaterThread.join();
+                }
+
+                flacPlayer.open(file);
+                currentSong = song;
+
+                // Reiniciar slider
+                PlaybackSlider.setMin(0);
+                PlaybackSlider.setMax(flacPlayer.getTotalSamples());
+                PlaybackSlider.setValue(0);
+
+                stopSliderUpdater = false;
+                sliderUpdaterThread = new Thread(() -> {
+                    while (!stopSliderUpdater && (flacPlayer.isPlaying() || flacPlayer.getCurrentSample() < flacPlayer.getTotalSamples())) {
+                        // Solo actualizar si el usuario NO está arrastrando el slider
+                        if (!userDraggingSlider) {
+                            final double pos = flacPlayer.getCurrentSample();
+                            javafx.application.Platform.runLater(() -> PlaybackSlider.setValue(pos));
+                        }
+                        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+                    }
+                });
+                sliderUpdaterThread.setDaemon(true);
+                sliderUpdaterThread.start();
+
+                // Forzar slider a 0 justo antes de iniciar
+                javafx.application.Platform.runLater(() -> PlaybackSlider.setValue(0));
+
+                flacPlayer.play();
+                PlayPauseButton.setText("Pause");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
