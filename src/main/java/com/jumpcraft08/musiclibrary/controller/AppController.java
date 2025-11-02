@@ -7,8 +7,7 @@ import com.jumpcraft08.musiclibrary.model.TypeFile;
 import com.jumpcraft08.musiclibrary.view.SongContextMenu;
 import com.jumpcraft08.musiclibrary.util.OpenSongFile;
 import com.jumpcraft08.musiclibrary.util.RatingManager;
-import com.jumpcraft08.musiclibrary.view.FlacPlayer;
-
+import com.jumpcraft08.musiclibrary.util.FlacPlayer;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -16,7 +15,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.layout.HBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 
@@ -36,83 +34,56 @@ public class AppController {
     @FXML private MenuItem CoverColumnMenuItem;
     @FXML private MenuItem RatingColumnMenuItem;
 
-    @FXML private HBox PlaybackControls;
     @FXML private Button PlayPauseButton;
     @FXML private Slider PlaybackSlider;
 
-    private FlacPlayer flacPlayer = new FlacPlayer();
-    private SongFile currentSong;
+    private final FlacPlayer flacPlayer = new FlacPlayer();
 
-    private Thread sliderUpdaterThread; // hilo único para actualizar slider
-    private volatile boolean stopSliderUpdater = false;
-
-    private volatile boolean userDraggingSlider = false;
-
-    private Thread[] sliderThreadHolder = new Thread[1];
-    private boolean[] stopSliderUpdaterWrapper = new boolean[1]; // wrapper para detener slider
-    private boolean[] userDraggingSliderWrapper = new boolean[1];
+    private final Thread[] sliderThreadHolder = new Thread[1];
+    private final boolean[] stopSliderUpdaterWrapper = new boolean[1];
+    private final boolean[] userDraggingSliderWrapper = new boolean[1];
 
     private final ConfigManager config = new ConfigManager();
     private final RatingManager ratingManager = new RatingManager();
 
     @FXML
     public void initialize() {
-        boolean showArtistColumn = config.getBoolean("showArtistColumn", true);
-        ArtistColumn.setVisible(showArtistColumn);
-        ArtistColumnMenuItem.setText(showArtistColumn ? "Ocultar Columna Artistas" : "Ver Columna Artistas");
+        // Inicializar visibilidad y textos de columnas según configuración
+        setupColumn(ArtistColumn, ArtistColumnMenuItem, "showArtistColumn", "Ver Columna Artistas", "Ocultar Columna Artistas");
+        setupColumn(VersionsColumn, VersionsColumnMenuItem, "showVersionsColumn", "Ver Columna Versiones", "Ocultar Columna Versiones");
+        setupColumn(RatingColumn, RatingColumnMenuItem, "showRatingColumn", "Ver Columna Rating", "Ocultar Columna Rating");
+        setupColumn(CoverColumn, CoverColumnMenuItem, "showCoverColumn", "Ver Columna Cover", "Ocultar Covers");
 
-        boolean showVersionsColumn = config.getBoolean("showVersionsColumn", true);
-        VersionsColumn.setVisible(showVersionsColumn);
-        VersionsColumnMenuItem.setText(showVersionsColumn ? "Ocultar Columna Versiones" : "Ver Columna Versiones");
-
-        boolean showRatingColumn = config.getBoolean("showRatingColumn", true);
-        RatingColumn.setVisible(showRatingColumn);
-        RatingColumnMenuItem.setText(showRatingColumn ? "Ocultar Columna Rating" : "Ver Columna Rating");
+        // Configurar columna de rating y cover
         ratingManager.configureRatingColumn(RatingColumn);
-
-        boolean showCoverColumn = config.getBoolean("showCoverColumn", false);
-        CoverColumn.setVisible(showCoverColumn);
-        CoverColumnMenuItem.setText(showCoverColumn ? "Ocultar Covers" : "Ver Covers");
-        CoverColumn.setCellValueFactory(cell ->
-                new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getCoverFile())
-        );
+        CoverColumn.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getCoverFile()));
         CoverColumn.setCellFactory(com.jumpcraft08.musiclibrary.view.RenderCover.create());
 
-
+        // Fábrica de filas de la tabla
         TableSong.setRowFactory(tv -> {
             TableRow<SongFile> row = new TableRow<>();
-
-            // Doble clic
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
                     OpenSongFile.openSong(
-                            row.getItem(),               // canción
-                            flacPlayer,                  // reproductor
-                            PlaybackSlider,              // slider
-                            PlayPauseButton,             // botón
-                            sliderThreadHolder,          // hilo del slider
-                            stopSliderUpdaterWrapper,    // wrapper para detener slider
-                            userDraggingSliderWrapper    // wrapper para arrastre
+                            row.getItem(), flacPlayer, PlaybackSlider, PlayPauseButton,
+                            sliderThreadHolder, stopSliderUpdaterWrapper, userDraggingSliderWrapper
                     );
                 }
             });
-
-            // Menú contextual
             row.contextMenuProperty().bind(
                     javafx.beans.binding.Bindings.when(row.emptyProperty())
-                            .then((ContextMenu)null)
+                            .then((ContextMenu) null)
                             .otherwise(SongContextMenu.createContextMenu(row))
             );
-
             row.prefHeightProperty().bind(
                     javafx.beans.binding.Bindings.when(CoverColumn.visibleProperty())
                             .then(64.0)
                             .otherwise(24.0)
             );
-
             return row;
         });
 
+        // Controles de reproducción
         PlayPauseButton.setOnAction(e -> {
             if (flacPlayer.isPlaying()) {
                 flacPlayer.pause();
@@ -123,64 +94,18 @@ public class AppController {
             }
         });
 
-        // NUEVO: Slider para hacer seek
-        PlaybackSlider.setOnMouseReleased(e -> {
-            if (flacPlayer.getTotalSamples() > 0) {
-                flacPlayer.seek((long) PlaybackSlider.getValue());
-            }
-        });
-
         PlaybackSlider.setOnMousePressed(e -> userDraggingSliderWrapper[0] = true);
         PlaybackSlider.setOnMouseReleased(e -> {
             userDraggingSliderWrapper[0] = false;
-            if (flacPlayer.getTotalSamples() > 0) {
+            if (flacPlayer.getTotalSamples() > 0)
                 flacPlayer.seek((long) PlaybackSlider.getValue());
-            }
         });
     }
 
-    private void playSong(SongFile song) {
-        try {
-            File file = song.getPreferredFile();
-            if (file != null && file.exists()) {
-                // Detener reproducción anterior y slider
-                flacPlayer.stop();
-                stopSliderUpdater = true;
-                if (sliderUpdaterThread != null && sliderUpdaterThread.isAlive()) {
-                    sliderUpdaterThread.join();
-                }
-
-                flacPlayer.open(file);
-                currentSong = song;
-
-                // Reiniciar slider
-                PlaybackSlider.setMin(0);
-                PlaybackSlider.setMax(flacPlayer.getTotalSamples());
-                PlaybackSlider.setValue(0);
-
-                stopSliderUpdater = false;
-                sliderUpdaterThread = new Thread(() -> {
-                    while (!stopSliderUpdater && (flacPlayer.isPlaying() || flacPlayer.getCurrentSample() < flacPlayer.getTotalSamples())) {
-                        // Solo actualizar si el usuario NO está arrastrando el slider
-                        if (!userDraggingSlider) {
-                            final double pos = flacPlayer.getCurrentSample();
-                            javafx.application.Platform.runLater(() -> PlaybackSlider.setValue(pos));
-                        }
-                        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
-                    }
-                });
-                sliderUpdaterThread.setDaemon(true);
-                sliderUpdaterThread.start();
-
-                // Forzar slider a 0 justo antes de iniciar
-                javafx.application.Platform.runLater(() -> PlaybackSlider.setValue(0));
-
-                flacPlayer.play();
-                PlayPauseButton.setText("Pause");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void setupColumn(TableColumn<?, ?> column, MenuItem menuItem, String configKey, String showText, String hideText) {
+        boolean visible = config.getBoolean(configKey, true);
+        column.setVisible(visible);
+        menuItem.setText(visible ? hideText : showText);
     }
 
     @FXML
@@ -188,29 +113,10 @@ public class AppController {
         SelectFolder.Select(SelectFolder.SelectReason.POPULATE_TABLE, new TableBundle(TableSong, FileNameColumn, ArtistColumn, VersionsColumn, RatingColumn), TypeFile.FLAC_HI_RES, TypeFile.FLAC_CD, TypeFile.M4A);
     }
 
-    @FXML
-    public void HideArtistColumn() {
-        toggleColumnVisibility(ArtistColumn, ArtistColumnMenuItem, "showArtistColumn",
-                "Ver Columna Artistas", "Ocultar Columna Artistas");
-    }
-
-    @FXML
-    public void HideVersionsColumn() {
-        toggleColumnVisibility(VersionsColumn, VersionsColumnMenuItem, "showVersionsColumn",
-                "Ver Columna Versiones", "Ocultar Columna Versiones");
-    }
-
-    @FXML
-    public void HideCoverColumn() {
-        toggleColumnVisibility(CoverColumn, CoverColumnMenuItem, "showCoverColumn",
-                "Ver Columna Cover", "Ocultar Columna Cover");
-    }
-
-    @FXML
-    public void HideRatingColumn() {
-        toggleColumnVisibility(RatingColumn, RatingColumnMenuItem, "showRatingColumn",
-                "Ver Columna Rating", "Ocultar Columna Rating");
-    }
+    @FXML public void HideArtistColumn() {toggleColumnVisibility(ArtistColumn, ArtistColumnMenuItem, "showArtistColumn", "Ver Columna Artistas", "Ocultar Columna Artistas");}
+    @FXML public void HideVersionsColumn() {toggleColumnVisibility(VersionsColumn, VersionsColumnMenuItem, "showVersionsColumn", "Ver Columna Versiones", "Ocultar Columna Versiones");}
+    @FXML public void HideCoverColumn() {toggleColumnVisibility(CoverColumn, CoverColumnMenuItem, "showCoverColumn", "Ver Columna Cover", "Ocultar Columna Cover");}
+    @FXML public void HideRatingColumn() {toggleColumnVisibility(RatingColumn, RatingColumnMenuItem, "showRatingColumn", "Ver Columna Rating", "Ocultar Columna Rating");}
 
     private void toggleColumnVisibility(TableColumn<?, ?> column, MenuItem menuItem, String configKey, String showText, String hideText) {
         boolean currentlyVisible = column.isVisible();

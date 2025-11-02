@@ -2,7 +2,6 @@ package com.jumpcraft08.musiclibrary.util;
 
 import com.jumpcraft08.musiclibrary.view.DialogManager;
 import com.jumpcraft08.musiclibrary.model.SongFile;
-import com.jumpcraft08.musiclibrary.view.FlacPlayer;
 
 import javafx.application.Platform;
 import javafx.scene.control.Slider;
@@ -16,7 +15,6 @@ public class OpenSongFile {
         if (song == null || player == null || slider == null || playPauseButton == null) return;
 
         try {
-            // Detener reproducción previa
             player.stop();
             if (sliderThreadHolder[0] != null && sliderThreadHolder[0].isAlive()) stopFlag[0] = true;
 
@@ -29,13 +27,11 @@ public class OpenSongFile {
 
             player.open(file);
 
-            // Configurar slider
             slider.setMin(0);
             slider.setMax(player.getTotalSamples());
             slider.setValue(0);
             playPauseButton.setText("Pause");
 
-            // Iniciar hilo de actualización
             stopFlag[0] = false;
             sliderThreadHolder[0] = new Thread(() -> {
                 while (!stopFlag[0] && (player.isPlaying() || player.getCurrentSample() < player.getTotalSamples())) {
@@ -58,7 +54,7 @@ public class OpenSongFile {
     }
 
 
-    public static void DefaultopenSong(SongFile song) {
+    public static void DefaultOpenSong(SongFile song) {
         if (song == null) return;
         File file = song.getPreferredFile();
         if (file != null && file.exists()) {
