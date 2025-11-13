@@ -24,7 +24,7 @@ public class RenderCover {
             {
                 imageView.setFitWidth(64);
                 imageView.setFitHeight(64);
-                imageView.setPreserveRatio(false); // para ocupar todo el espacio
+                imageView.setPreserveRatio(false);
             }
 
             @Override

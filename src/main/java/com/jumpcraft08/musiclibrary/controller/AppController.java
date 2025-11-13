@@ -22,12 +22,12 @@ import java.io.File;
 
 public class AppController {
 
-    @FXML private TableView<SongFile> TableSong;
-    @FXML private TableColumn<SongFile, File> CoverColumn;
-    @FXML private TableColumn<SongFile, String> FileNameColumn;
-    @FXML private TableColumn<SongFile, String> ArtistColumn;
-    @FXML private TableColumn<SongFile, String> VersionsColumn;
-    @FXML private TableColumn<SongFile, Number> RatingColumn;
+    @FXML protected TableView<SongFile> TableSong;
+    @FXML protected TableColumn<SongFile, File> CoverColumn;
+    @FXML protected TableColumn<SongFile, String> FileNameColumn;
+    @FXML protected TableColumn<SongFile, String> ArtistColumn;
+    @FXML protected TableColumn<SongFile, String> VersionsColumn;
+    @FXML protected TableColumn<SongFile, Number> RatingColumn;
 
     @FXML private MenuItem ArtistColumnMenuItem;
     @FXML private MenuItem VersionsColumnMenuItem;
@@ -48,18 +48,15 @@ public class AppController {
 
     @FXML
     public void initialize() {
-        // Inicializar visibilidad y textos de columnas según configuración
         setupColumn(ArtistColumn, ArtistColumnMenuItem, "showArtistColumn", "Ver Columna Artistas", "Ocultar Columna Artistas");
         setupColumn(VersionsColumn, VersionsColumnMenuItem, "showVersionsColumn", "Ver Columna Versiones", "Ocultar Columna Versiones");
         setupColumn(RatingColumn, RatingColumnMenuItem, "showRatingColumn", "Ver Columna Rating", "Ocultar Columna Rating");
         setupColumn(CoverColumn, CoverColumnMenuItem, "showCoverColumn", "Ver Columna Cover", "Ocultar Covers");
 
-        // Configurar columna de rating y cover
         ratingManager.configureRatingColumn(RatingColumn);
         CoverColumn.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getCoverFile()));
         CoverColumn.setCellFactory(com.jumpcraft08.musiclibrary.view.RenderCover.create());
 
-        // Fábrica de filas de la tabla
         TableSong.setRowFactory(tv -> {
             TableRow<SongFile> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -83,7 +80,6 @@ public class AppController {
             return row;
         });
 
-        // Controles de reproducción
         PlayPauseButton.setOnAction(e -> {
             if (flacPlayer.isPlaying()) {
                 flacPlayer.pause();
@@ -127,5 +123,26 @@ public class AppController {
 
         config.setBoolean(configKey, newState);
     }
+
+    public void shutdown() {
+        try {
+            // Detener la reproducción
+            if (flacPlayer != null) {
+                flacPlayer.stop();
+            }
+
+            // Detener el hilo del slider
+            stopSliderUpdaterWrapper[0] = true;
+
+            if (sliderThreadHolder[0] != null && sliderThreadHolder[0].isAlive()) {
+                sliderThreadHolder[0].interrupt();
+            }
+
+            System.out.println("Reproductor detenido correctamente.");
+        } catch (Exception e) {
+            System.err.println("Error al cerrar el reproductor: " + e.getMessage());
+        }
+    }
+
 
 }

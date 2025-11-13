@@ -35,15 +35,14 @@ public class ListFiles {
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(extension)) {
                 Map<File, File> map = new HashMap<>();
-                map.put(file, null); // por defecto sin cover
+                map.put(file, null);
                 result.add(map);
             } else if (file.isDirectory()) {
-                // Buscar cover en la carpeta
+
                 File cover = new File(file, "cover.jpg");
                 List<Map<File, File>> innerFiles = listFilesWithCover(file, maxDepth - 1, extension);
 
                 for (Map<File, File> entry : innerFiles) {
-                    // Asociar cover si existe
                     entry.replaceAll((musicFile, oldCover) -> cover.exists() ? cover : null);
                 }
 

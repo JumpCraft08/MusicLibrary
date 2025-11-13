@@ -30,6 +30,6 @@ public enum TypeFile {
                 return type;
             }
         }
-        return null; // Ningún tipo coincide
+        return null;
     }
 }
