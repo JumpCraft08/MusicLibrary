@@ -1,4 +1,4 @@
-package com.jumpcraft08.musiclibrary.util;
+package com.jumpcraft08.flac_implementation.player;
 
 import io.nayuki.flac.decode.FlacDecoder;
 import io.nayuki.flac.common.StreamInfo;
@@ -20,19 +20,31 @@ public class FlacPlayer {
 
     private Thread playbackThread;
 
+    // Listener para notificar fin de reproducción
+    public interface PlaybackListener {
+        void onPlaybackFinished();
+    }
+
+    private PlaybackListener playbackListener;
+
+    public void setPlaybackListener(PlaybackListener listener) {
+        this.playbackListener = listener;
+    }
+
+    // Abrir archivo FLAC
     public void open(File file) throws IOException, LineUnavailableException {
         stop(); // detener cualquier reproducción previa
 
         decoder = new FlacDecoder(file);
-        while (decoder.readAndHandleMetadataBlock() != null) {}
+        while (decoder.readAndHandleMetadataBlock() != null) {} // leer metadata
         info = decoder.streamInfo;
         buffer = new int[info.numChannels][65536];
 
         currentSample = 0;
-
         startPlaybackThread();
     }
 
+    // Hilo de reproducción
     private void startPlaybackThread() throws LineUnavailableException {
         stopRequested = false;
         playing = false;
@@ -62,14 +74,8 @@ public class FlacPlayer {
                     for (int i = 0, k = 0; i < read; i++) {
                         for (int ch = 0; ch < info.numChannels; ch++) {
                             int val = buffer[ch][i];
-
-                            if (info.sampleDepth == 24) {
-                                val = val / 256; // escalar 24-bit a 16-bit
-                            }
-
-                            // Saturar a 16-bit
-                            if (val > 32767) val = 32767;
-                            if (val < -32768) val = -32768;
+                            if (info.sampleDepth == 24) val /= 256;
+                            val = Math.max(-32768, Math.min(32767, val));
 
                             audioBytes[k++] = (byte) (val & 0xFF);
                             audioBytes[k++] = (byte) ((val >> 8) & 0xFF);
@@ -84,6 +90,11 @@ public class FlacPlayer {
                 line.stop();
                 line.close();
 
+                // Notificar fin de reproducción si no se detuvo manualmente
+                if (playbackListener != null && !stopRequested) {
+                    playbackListener.onPlaybackFinished();
+                }
+
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -92,29 +103,15 @@ public class FlacPlayer {
         playbackThread.start();
     }
 
-    public synchronized void togglePlayPause() {
-        playing = !playing;
-    }
+    // Controles
+    public synchronized void togglePlayPause() { playing = !playing; }
+    public synchronized void play() { playing = true; }
+    public synchronized void pause() { playing = false; }
 
-    public synchronized void play() {
-        playing = true;
-    }
+    public boolean isPlaying() { return playing; }
 
-    public synchronized void pause() {
-        playing = false;
-    }
-
-    public boolean isPlaying() {
-        return playing;
-    }
-
-    public long getCurrentSample() {
-        return currentSample;
-    }
-
-    public long getTotalSamples() {
-        return info != null ? info.numSamples : 0;
-    }
+    public long getCurrentSample() { return currentSample; }
+    public long getTotalSamples() { return info != null ? info.numSamples : 0; }
 
     public void seek(long targetSample) {
         try {

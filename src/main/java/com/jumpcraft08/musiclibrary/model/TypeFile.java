@@ -5,7 +5,7 @@ import java.io.File;
 public enum TypeFile {
     M4A(3, ".m4a"),
     FLAC_CD(1, ".flac"),
-    FLAC_HI_RES(2, "flac");
+    FLAC_HI_RES(2, ".flac");
 
     private final int priority;
     private final String extension;

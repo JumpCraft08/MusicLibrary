@@ -3,7 +3,6 @@ package com.jumpcraft08.musiclibrary.view;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import com.jumpcraft08.musiclibrary.controller.AppController;
@@ -11,6 +10,9 @@ import com.jumpcraft08.musiclibrary.controller.AppController;
 import java.io.IOException;
 
 public class App extends Application {
+
+    private static AppController mainController;
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/jumpcraft08/musiclibrary/app.fxml"));
@@ -20,16 +22,18 @@ public class App extends Application {
 
         stage.setScene(scene);
 
-        AppController controller = fxmlLoader.getController();
+        mainController = fxmlLoader.getController();
 
         // Detectar cierre de la ventana
         stage.setOnCloseRequest(event -> {
-            controller.shutdown(); // ← esto llama al método que hiciste
+            mainController.shutdown();
             System.out.println("Cerrando aplicación...");
-            Platform.exit();
         });
 
-
         stage.show();
+    }
+
+    public static AppController getMainController() {
+        return mainController;
     }
 }

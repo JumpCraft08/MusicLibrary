@@ -7,7 +7,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
-import java.util.Objects;
 import java.util.function.IntConsumer;
 
 public class DialogManager {
@@ -19,7 +18,9 @@ public class DialogManager {
         alert.setContentText(content);
         alert.showAndWait();
 
-        LogManager.logError(DialogManager.class, header + " - " + content, Objects.requireNonNullElseGet(e, () -> new Exception("No se proporcionó excepción")));
+        if (e != null) {
+            LogManager.logError(DialogManager.class, header + " - " + content, e);
+        }
     }
 
     public static void showRatingDialog(String songName, int currentRating, IntConsumer onRatingEntered) {

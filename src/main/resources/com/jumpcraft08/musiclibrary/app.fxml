@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Label?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0"
@@ -22,12 +23,19 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Ver">
                 <MenuItem fx:id="ArtistColumnMenuItem" mnemonicParsing="false" text="Ver Columna Artistas" onAction="#HideArtistColumn" />
+                <MenuItem fx:id="AlbumColumnMenuItem" mnemonicParsing="false" text="Ver Columna Album" onAction="#HideAlbumColumn" />
                 <MenuItem fx:id="VersionsColumnMenuItem" mnemonicParsing="false" text="Ver Columna Versiones" onAction="#HideVersionsColumn" />
                 <MenuItem fx:id="CoverColumnMenuItem" mnemonicParsing="false" text="Ver Columna Cover" onAction="#HideCoverColumn" />
                 <MenuItem fx:id="RatingColumnMenuItem" mnemonicParsing="false" text="Ver Columna Rating" onAction="#HideRatingColumn" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
                 <MenuItem mnemonicParsing="false" text="About" />
+            </Menu>
+            <Menu mnemonicParsing="false" text="Ajustes">
+                <MenuItem mnemonicParsing="false" text="Abrir Ajustes" onAction="#openSettingsWindow"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Buscar">
+                <MenuItem text="Buscar Canciones" onAction="#openSearchDialog"/>
             </Menu>
         </MenuBar>
     </top>
@@ -38,6 +46,7 @@
                 <TableColumn fx:id="CoverColumn" prefWidth="64.0" text="Cover" />
                 <TableColumn fx:id="FileNameColumn" prefWidth="132.0" text="Nombre de Archivo" />
                 <TableColumn fx:id="ArtistColumn" prefWidth="147.0" text="Artista" />
+                <TableColumn fx:id="AlbumColumn" prefWidth="147.0" text="Album" />
                 <TableColumn fx:id="VersionsColumn" prefWidth="122.0" text="Versiones" />
                 <TableColumn fx:id="RatingColumn" prefWidth="122.0" text="Rating" />
             </columns>
@@ -45,9 +54,10 @@
     </center>
 
     <bottom>
-        <HBox fx:id="PlaybackControls" spacing="10" visible="true" alignment="CENTER">
+        <HBox spacing="10" alignment="CENTER">
+            <Label fx:id="NowPlayingLabel" text="Nada reproduciéndose" />
             <Button fx:id="PlayPauseButton" text="Play"/>
-            <Slider fx:id="PlaybackSlider" min="0" max="1000" value="0" prefWidth="400"/>
+            <Slider fx:id="PlaybackSlider" max="1000" prefWidth="400"/>
         </HBox>
     </bottom>
 

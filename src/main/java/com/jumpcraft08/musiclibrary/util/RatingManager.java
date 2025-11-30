@@ -1,34 +1,33 @@
 package com.jumpcraft08.musiclibrary.util;
 
 import com.jumpcraft08.musiclibrary.model.SongFile;
-
 import javafx.scene.control.TableColumn;
 
-import java.io.*;
+import java.util.List;
 
 public class RatingManager {
 
-    private final PropertiesManager manager;
+    public RatingManager() { }
 
-    public RatingManager() {
-        manager = new PropertiesManager("ratings.properties");
-    }
-
+    /** Obtiene el rating de una canción por nombre leyendo directamente del JSON */
     public int getRating(String songName) {
-        String val = manager.props.getProperty(songName);
-        if (val == null) return -1;
-        try {
-            return Integer.parseInt(val);
-        } catch (NumberFormatException e) {
-            return -1;
+        List<SongFile> cached = JsonCache.load();
+        if (cached == null) return -1;
+        for (SongFile song : cached) {
+            if (song.getFileName().equals(songName)) {
+                return song.getRating();
+            }
         }
+        return -1;
     }
 
-    public void setRating(String songName, int rating) {
-        manager.props.setProperty(songName, String.valueOf(rating));
-        manager.save();
+    /** Establece el rating de una canción y actualiza el JSON */
+    public void setRating(SongFile song, int rating) {
+        song.setRating(rating);  // actualizar objeto en memoria
+        JsonCache.updateSongRating(song.getFileName(), rating); // actualizar JSON directamente
     }
 
+    /** Configura la columna de ratings en la tabla */
     public void configureRatingColumn(TableColumn<SongFile, Number> ratingColumn) {
         ratingColumn.setCellValueFactory(cell -> cell.getValue().ratingProperty());
         ratingColumn.setCellFactory(col -> new javafx.scene.control.TableCell<>() {

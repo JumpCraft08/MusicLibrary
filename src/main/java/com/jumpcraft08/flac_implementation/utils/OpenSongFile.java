@@ -1,5 +1,6 @@
-package com.jumpcraft08.musiclibrary.util;
+package com.jumpcraft08.flac_implementation.utils;
 
+import com.jumpcraft08.flac_implementation.player.FlacPlayer;
 import com.jumpcraft08.musiclibrary.view.DialogManager;
 import com.jumpcraft08.musiclibrary.model.SongFile;
 
@@ -50,22 +51,6 @@ public class OpenSongFile {
         } catch (Exception e) {
             DialogManager.showError("Fallo al abrir", "No se pudo abrir la canción",
                     "Error al abrir: " + song.getFileName(), e);
-        }
-    }
-
-
-    public static void DefaultOpenSong(SongFile song) {
-        if (song == null) return;
-        File file = song.getPreferredFile();
-        if (file != null && file.exists()) {
-            try {
-                java.awt.Desktop.getDesktop().open(file);
-            } catch (Exception e) {
-
-                DialogManager.showError("Fallo al abrir", "El archivo no es valido", "No se pudo abrir el archivo: " + file.getAbsolutePath(), e);
-            }
-        } else {
-            DialogManager.showError("Fallo al abrir", "Archivo no encontrado", "No se encontró el archivo preferente para: " + song.getFileName(), null);
         }
     }
 }
