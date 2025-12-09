@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Project Specific ###
+/src/sec/logs
+/src/sec/bin
+songs_cache.json
+playlists.json
+/out

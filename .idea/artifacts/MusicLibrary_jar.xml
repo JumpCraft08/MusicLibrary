@@ -11,6 +11,8 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/21.0.6/javafx-base-21.0.6-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/21.0.6/javafx-controls-21.0.6-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/21.0.6/javafx-graphics-21.0.6-win.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.13.2" />
+      <element id="library" level="project" name="Maven: net.jthink:jaudiotagger:3.0.1" />
     </root>
   </artifact>
 </component>
